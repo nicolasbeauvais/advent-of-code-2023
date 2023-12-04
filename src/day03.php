@@ -1,6 +1,6 @@
 <?php
 
-function main()
+function main(): void
 {
     $symbols = $numbers = [];
     $y = 0;
@@ -25,7 +25,7 @@ function main()
     echo "Part 2: " . part2($symbols, $numbers) . "\n";
 }
 
-function part1(array $symbols, array $numbers)
+function part1(array $symbols, array $numbers): int
 {
     $result = 0;
 
@@ -45,7 +45,7 @@ function part1(array $symbols, array $numbers)
     return $result;
 }
 
-function part2(array $symbols, array $numbers)
+function part2(array $symbols, array $numbers): int
 {
     $result = 0;
     $gears = [];
