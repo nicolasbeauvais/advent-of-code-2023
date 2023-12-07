@@ -2,6 +2,9 @@
 
 namespace AOC\_2023;
 
+/**
+ * @see https://adventofcode.com/2023/day/7
+ */
 class Day07 extends AbstractDay
 {
     private const FIVE_OF_A_KIND = 7;
@@ -120,4 +123,3 @@ class Day07 extends AbstractDay
         return $this->rank($this->parse(true));
     }
 }
-

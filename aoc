@@ -11,8 +11,6 @@ use AOC\_2023\AbstractDay;
 use Minicli\App;
 use Minicli\Command\CommandCall;
 use Minicli\Exception\CommandNotFoundException;
-use Minicli\Output\Theme\DefaultTheme;
-use Minicli\Output\CLIColors;
 
 class PartNotImplementedException extends Exception {}
 
@@ -71,7 +69,7 @@ function run(int $year, int $day, int $part, bool $test = false): array
 }
 
 $app = new App([
-  'theme' => '\Default',
+  'theme' => '\Unicorn',
 ]);
 
 $app->setSignature('./aoc command');
@@ -133,7 +131,7 @@ $app->registerCommand('day', function(CommandCall $input) use ($app) {
 });
 
 $app->registerCommand('year', function(CommandCall $input) use ($app) {
-    $year = (int)date('Y');
+    $year = (int)($input->hasParam('year') ? $input->getParam('year') : date('Y'));
     $day = 1;
     $part = 1;
 
@@ -162,6 +160,30 @@ $app->registerCommand('year', function(CommandCall $input) use ($app) {
         [array_keys($results[0])],
         array_map('array_values', $results)
     ));
+});
+
+$app->registerCommand('make', function(CommandCall $input) use ($app) {
+    $year = (int)($input->hasParam('year') ? $input->getParam('year') : date('Y'));
+    $template = file_get_contents('./stubs/day.stub');
+
+    foreach (range(1, 25) as $day) {
+        $params = [
+            '{class}' => 'Day' . str_pad($day, 2, '0', STR_PAD_LEFT),
+            '{day}' => $day,
+            '{year}' => $year,
+        ];
+
+        $file = __DIR__ . "/src/{$year}/{$params['{class}']}.php";
+        $content = str_replace(array_keys($params), array_values($params), $template);
+
+        if (file_exists($file)) {
+            $app->info("Skip file creation for {$year}/{$params['{class}']}.php, already exists...");
+            continue;
+        }
+
+        file_put_contents($file, $content);
+        $app->success("Created file {$year}/{$params['{class}']}.php");
+    }
 });
 
 try {

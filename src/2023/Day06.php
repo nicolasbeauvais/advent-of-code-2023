@@ -2,6 +2,9 @@
 
 namespace AOC\_2023;
 
+/**
+ * @see https://adventofcode.com/2023/day/6
+ */
 class Day06 extends AbstractDay
 {
     public static function answers(): array
