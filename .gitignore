@@ -1,5 +1,3 @@
-*.beam
-*.ez
-build
-erl_crash.dump
-inputs/*.txt
+.idea
+vendor/
+src/**/inputs/*.txt

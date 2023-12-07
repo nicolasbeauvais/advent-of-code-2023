@@ -1,0 +1,15 @@
+{
+    "require": {
+        "minicli/minicli": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "AOC\\": "src/",
+            "AOC\\_2023\\": "src/2023/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

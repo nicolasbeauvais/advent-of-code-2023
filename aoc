@@ -1,0 +1,172 @@
+#!/usr/bin/php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit;
+}
+
+require __DIR__ . '/vendor/autoload.php';
+
+use AOC\_2023\AbstractDay;
+use Minicli\App;
+use Minicli\Command\CommandCall;
+use Minicli\Exception\CommandNotFoundException;
+use Minicli\Output\Theme\DefaultTheme;
+use Minicli\Output\CLIColors;
+
+class PartNotImplementedException extends Exception {}
+
+function run(int $year, int $day, int $part, bool $test = false): array
+{
+    $day = str_pad($day, 2, '0', STR_PAD_LEFT);
+    $class = "\\AOC\\_{$year}\\Day{$day}";
+
+    if (!class_exists($class)) {
+        throw new Exception("Class not found $class");
+    }
+
+    $file = match ($test) {
+        true => __DIR__ . "/src/{$year}/inputs/day{$day}.test.txt",
+        false => __DIR__ . "/src/{$year}/inputs/day{$day}.txt",
+    };
+
+    if (!file_exists($file)) {
+        throw new Exception("Input file not found $file");
+    }
+
+    $instance = new $class($file);
+
+    memory_reset_peak_usage();
+
+    $start = microtime(true);
+
+    $result = match ($part) {
+        1 => $instance->part1(),
+        2 => $instance->part2(),
+        default => throw new Exception("Invalid part $part"),
+    };
+
+    $time = microtime(true) - $start;
+    $memory = memory_get_peak_usage();
+
+    if ($result === AbstractDay::TODO) {
+        throw new PartNotImplementedException("Part $part not implemented in $class");
+    }
+
+    $valid = $instance::answers()[$part - 1][$test ? 0 : 1] === $result;
+
+    $seconds = str_pad(floor($time), 2, '0', STR_PAD_LEFT);
+    $milliseconds = str_pad(floor(($time - $seconds) * 1000), 3, '0', STR_PAD_LEFT);
+    $microseconds = str_pad(floor((($time - $seconds) * 1000 - $milliseconds) * 1000), 3, '0', STR_PAD_LEFT);
+
+    return [
+        'Year' => (string)$year,
+        'Day' => $day,
+        'Part' => (string)$part,
+        'Output' => (string)$result,
+        'Result' => $valid ? '✅' : '❌',
+        'Memory' => round($memory/ (1024 ** ($i = floor(log($memory, 1024)))),2).' '.['b','kb','mb','gb','tb','pb'][$i],
+        'Time' => "{$seconds} s, {$milliseconds} ms, {$microseconds} μs".($test ? ' 🚧' : '')
+    ];
+}
+
+$app = new App([
+  'theme' => '\Default',
+]);
+
+$app->setSignature('./aoc command');
+
+$app->registerCommand('last', function(CommandCall $input) use ($app) {
+    $year = (int)date('Y');
+    $day = (int)date('d');
+    $part = 2;
+
+    while (true) {
+        try {
+            $result = run($year, $day, $part, true);
+            break;
+        } catch (Exception $e) {
+            if ($part === 2) {
+              --$part;
+              continue;
+            }
+
+            if ($day === 0) {
+                throw $e;
+            }
+
+            $part = 2;
+            --$day;
+        }
+    }
+
+    $app->display("Results for Year $year Day $day Part $part");
+
+    // If test result is successful, try to run the real input
+    if ($result['Result'] === '✅') {
+        $app->success('Test input passed 🎉');
+        $app->info('Now running real input...');
+
+        $result = run($year, $day, $part);
+    }
+
+    $app->printTable([
+        array_keys($result),
+        array_values($result),
+    ]);
+});
+
+$app->registerCommand('day', function(CommandCall $input) use ($app) {
+    $year = (int)($input->hasParam('year') ? $input->getParam('year') : date('Y'));
+    $day = (int)($input->hasParam('day') ? $input->getParam('day') : date('d'));
+
+    $part1 = run($year, $day, 1);
+    $part2 = run($year, $day, 2);
+
+    $app->display("Results for Year $year Day $day");
+
+    $app->printTable([
+        array_keys($part1),
+        array_values($part1),
+        array_values($part2),
+    ]);
+});
+
+$app->registerCommand('year', function(CommandCall $input) use ($app) {
+    $year = (int)date('Y');
+    $day = 1;
+    $part = 1;
+
+    $results = [];
+
+    while (true) {
+        try {
+            $results[] = run($year, $day, $part);
+        } catch (Exception $e) {}
+
+        if ($day === 25 && $part === 2) {
+            break;
+        }
+
+        if ($part === 2) {
+            $part = 1;
+            ++$day;
+        } else {
+            ++$part;
+        }
+    }
+
+    $app->display("Results for Year $year");
+
+    $app->printTable(array_merge(
+        [array_keys($results[0])],
+        array_map('array_values', $results)
+    ));
+});
+
+try {
+    count($argv) === 1 && $argv[] = 'last';
+    $app->runCommand($argv);
+} catch (CommandNotFoundException $e) {
+    echo 'An error occurred running the command: ',  $e->getMessage(), "\n";
+}
