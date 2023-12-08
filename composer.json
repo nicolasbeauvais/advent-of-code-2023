@@ -1,6 +1,7 @@
 {
     "require": {
-        "minicli/minicli": "^4.2"
+        "minicli/minicli": "^4.2",
+        "ext-gmp": "*"
     },
     "autoload": {
         "psr-4": {
