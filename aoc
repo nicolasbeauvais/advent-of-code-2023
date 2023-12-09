@@ -51,18 +51,24 @@ function run(int $year, int $day, int $part, bool $test = false): array
         throw new PartNotImplementedException("Part $part not implemented in $class");
     }
 
-    $valid = $instance::answers()[$part - 1][$test ? 0 : 1] === $result;
+    $expected = $instance::answers()[$part - 1][$test ? 0 : 1];
 
     $seconds = str_pad(floor($time), 2, '0', STR_PAD_LEFT);
     $milliseconds = str_pad(floor(($time - $seconds) * 1000), 3, '0', STR_PAD_LEFT);
     $microseconds = str_pad(floor((($time - $seconds) * 1000 - $milliseconds) * 1000), 3, '0', STR_PAD_LEFT);
+
+    $resultEmoji = match (true) {
+        $result === $expected => '✅',
+        $expected === AbstractDay::TODO => '🔼',
+        default => '❌',
+    };
 
     return [
         'Year' => (string)$year,
         'Day' => $day,
         'Part' => (string)$part,
         'Output' => (string)$result,
-        'Result' => $valid ? '✅' : '❌',
+        'Result' => $resultEmoji,
         'Memory' => round($memory/ (1024 ** ($i = floor(log($memory, 1024)))),2).' '.['b','kb','mb','gb','tb','pb'][$i],
         'Time' => "{$seconds} s, {$milliseconds} ms, {$microseconds} μs".($test ? ' 🚧' : '')
     ];
