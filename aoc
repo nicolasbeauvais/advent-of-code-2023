@@ -6,11 +6,15 @@ if (php_sapi_name() !== 'cli') {
 }
 
 require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/helpers.php';
 
 use AOC\_2023\AbstractDay;
 use Minicli\App;
 use Minicli\Command\CommandCall;
 use Minicli\Exception\CommandNotFoundException;
+use NunoMaduro\Collision\Provider;
+
+(new Provider)->register();
 
 class PartNotImplementedException extends Exception {}
 

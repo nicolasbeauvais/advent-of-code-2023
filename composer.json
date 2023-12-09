@@ -12,5 +12,9 @@
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
+    },
+    "require-dev": {
+        "nunomaduro/collision": "^8.0",
+        "symfony/var-dumper": "^7.0"
     }
 }
