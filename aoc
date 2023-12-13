@@ -93,7 +93,7 @@ $app->registerCommand('last', function(CommandCall $input) use ($app) {
         try {
             $result = run($year, $day, $part, true);
             break;
-        } catch (Exception $e) {
+        } catch (PartNotImplementedException $e) {
             if ($part === 2) {
               --$part;
               continue;
