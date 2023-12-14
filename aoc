@@ -127,9 +127,10 @@ $app->registerCommand('last', function(CommandCall $input) use ($app) {
 $app->registerCommand('day', function(CommandCall $input) use ($app) {
     $year = (int)($input->hasParam('year') ? $input->getParam('year') : date('Y'));
     $day = (int)($input->hasParam('day') ? $input->getParam('day') : date('d'));
+    $test = $input->hasFlag('test');
 
-    $part1 = run($year, $day, 1);
-    $part2 = run($year, $day, 2);
+    $part1 = run($year, $day, 1, $test);
+    $part2 = run($year, $day, 2, $test);
 
     $app->display("Results for Year $year Day $day");
 
